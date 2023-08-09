@@ -24,7 +24,7 @@ module spi_intf(
           count <= 0;
           cs <= 1'b1;
           mosi <=1'b0;
-          err <= 1;b0;
+          err <= 1'b0;
           done <= 1'b0;
         end
 
@@ -32,4 +32,96 @@ module spi_intf(
         din_reg <= {din, addr, wr};
         state <= check_op;
       end
+
+      check_op : begin
+        if(wr == 1'b1 && addr < 32)
+          begin
+            cs <= 1'b0;
+            state <= send_data;
+          end
+        else if (wr == 1'b0 && addr < 32)
+          begin
+            state <= read_data1;
+            cs <= 1'b0;
+          end
+        else begin
+          state <= error;
+          cs <= 1'b1;
+        end
+      end
+
+      send_data : begin
+        if(count <= 16)
+          begin
+            count <= count + 1;
+            mosi <= din_reg[count];
+            state = send_data;
+          end
+        else
+          begin
+            cs <= 1'b1;
+            mosi <= 1'b0;
+            if(op_done)
+              begin
+                count <= 0;
+                done <= 1'b1;
+                state <= idle;
+              end
+            else
+              begin
+                state <= send_data;
+              end
+          end
+      end
+
+      read_data1 : begin
+        if(count <= 8)
+          begin
+            count <= count + 1;
+            mosi <= din_reg[count];
+            state <= read_data1;
+          end
+        else
+          begin
+            count <= 0;
+            cs <= 1'b1;
+            state <= check_ready;
+          end
+      end
+
+      check_ready : begin
+        if(ready)
+          state <= read_data2;
+        else
+          state <= check_ready;
+      end
+
+      read_data2 : begin
+        if(count <= 7)
+          begin
+            count <= count + 1;
+            dout_reg[count] <= miso;
+            state = read_data2;
+          end
+        else
+          begin
+            cound <= 0;
+            done <= 1'b1;
+            state <= idle;
+          end
+      end
+      error : begin
+        err <= 1'b1;
+        state <= idle;
+        done <= 1'b1;
+      end
+      
+      default : begin
+        state <= idle;
+        count <= 0;
+      end
+      endcase
+    end
+  end
+  
 endmodule
