@@ -125,3 +125,5 @@ module spi_intf(
   end
   
 endmodule
+
+module spi_mem
