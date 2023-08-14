@@ -72,3 +72,27 @@ class read_data extends uvm_sequence#(transaction);
   endtask
 endclass
 
+//reset_dut
+
+class reset_dut extends uvm_sequence#(transaction);
+  `uvm_object_utils(reset_dut)
+
+  transaction tr;
+
+  function new(string name = "reset_dut");
+    super.new(name);
+  endfunction
+
+  virtual task body();
+    tr = transaction::type_id::credate("tr");
+    repeat(20)
+      begin
+        tr.addr_c.constraint_mode(1);
+        tr.addrp_c.constraint_mode(0);
+        start_item(tr);
+        assert(tr.randomize);
+        tr.op = rstdut;
+        finish_item(tr);
+      end
+  endtask
+endclass
