@@ -69,3 +69,7 @@ class driver extends uvm_driver #(transaction);
           @(posedge vif.done);
         end
       else if
+        virtual task run_phase(uvm_phase phase);
+  drive();
+  endtask
+endclass
