@@ -16,4 +16,16 @@ class driver extends uvm_driver #(transaction);
       `uvm_error("drv", "Unable to access Interface");
   endfunction
 
+  task reset_dut();
+
+    repeat(5)
+      begin
+        vif.rst <= 1'b1;
+        vif.addr <= 'h0;
+        vif.din <= 'h0;
+        vif.wr <= 1'b0;
+        `uvm_info("DRV", "System Reset : Start of Simulation", UVM_MEDIUM);
+        @(posedge vif.clk);
+      end
+  endtask
   
