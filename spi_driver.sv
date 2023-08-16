@@ -28,4 +28,44 @@ class driver extends uvm_driver #(transaction);
         @(posedge vif.clk);
       end
   endtask
+
+  task drive();
+    reset_dut();
+    forever begin
+
+      seq_item_port.get_next_item(tr);
+
+      if(tr.op == rstdut)
+        begin
+          vif.rst <= 1'b1;
+          @(posedge vif.clk);
+        end
+      else if(tr.op == writed || tr.op == writeerr || tr.op == rstdut)
+        begin
+          vif.rst <= 1'b0;
+          vif.wr <= 1'b1;
+          vif.addr <= tr.addr;
+          vif.din <= tr.din;
+          @(posedge vif.clk);
+          `uvm_info("DRV", $sformatf("mode : Write addr:%0h din:%0h wr:%0h", vif.addr, vif.din, vif.wr), UVM_NONE);
+          @posedge(vif.done);
+        end
+      else if(tr.op == readd || tr.op == readerr)
+        begin
+          vif.rst <= 1'b0;
+          vif.wr <= 1'b0;
+          vif.addr <= tr.addr;
+          vif.din <= tr.din;
+          @(posedge vif.clk);
+          `uvm_info("DRV", sformatf("mode : Read addr:%0h din:%0h wr:%0h", vif.addr, vif.din, vif.wr), UVM_NONE);
+          @(posedge vif.done);
+        end
+      seq_item_port.item_done();
+    end
+  endtask
   
+          
+          `uvm_info("DRV", $sformatf("mode : Write addr:%0h din:%0h wr:%0h", vif.addr, vif.din, vif.wr), UVM_NONE);
+          @(posedge vif.done);
+        end
+      else if
