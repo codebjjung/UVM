@@ -19,3 +19,39 @@ class mon extends uvm_monitor;
       `uvm_error("MON", "Unable to access Interface");
     this.spi_cov.vintf = vif;
   endfunction
+
+  virtual task run_phase(uvm_phase phase);
+    forever begin
+      repeat(2) @(posedge vif.clk);
+      if(vif.rst)
+        begin
+          tr.op = rstdut;
+          `uvm_info("MON", "SYSTEM RESET DETECTED", UVM_NONE);
+          send.write(tr);
+          spi_cov.spi_cg.sample();
+        end
+      else if (!vif.rst && vif.wr)
+        begin
+          @(posedge vif.done);
+          tr.op = writed;
+          tr.din = vif.din;
+          tr.addr = vif.addr;
+          tr.err = vif.err;
+          `uvm_info("MON", $sformatf("DATA WRITE addr : %0h data : %0h err : %0h", tr.addr, tr.din, tr.err), UVM_NONE);
+          send.write(tr);
+          spi_cov.spi_cg.sample();
+        end
+      else if (!vif.rst && !vif.wr)
+        begin
+          @(posedge vif.done);
+          tr.op = readd;
+          tr.addr = vif.addr;
+          tr.err = vif.err;
+          tr.dout = vif.dout;
+          `uvm_info("MON", $sformatf("DATA READ addr : %0h data : %0h slverr : %0h", tr.addr, tr.dout, tr.err), UVM_NONE);
+          send.write(tr);
+        end
+    end
+  endtask
+endclass
+                                     
