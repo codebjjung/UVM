@@ -40,6 +40,7 @@ class driver extends uvm_driver #(transaction);
           vif.rst <= 1'b1;
           @(posedge vif.clk);
         end
+      
       else if(tr.op == writed || tr.op == writeerr || tr.op == rstdut)
         begin
           vif.rst <= 1'b0;
@@ -50,6 +51,7 @@ class driver extends uvm_driver #(transaction);
           `uvm_info("DRV", $sformatf("mode : Write addr:%0h din:%0h wr:%0h", vif.addr, vif.din, vif.wr), UVM_NONE);
           @posedge(vif.done);
         end
+      
       else if(tr.op == readd || tr.op == readerr)
         begin
           vif.rst <= 1'b0;
@@ -63,13 +65,8 @@ class driver extends uvm_driver #(transaction);
       seq_item_port.item_done();
     end
   endtask
-  
-          
-          `uvm_info("DRV", $sformatf("mode : Write addr:%0h din:%0h wr:%0h", vif.addr, vif.din, vif.wr), UVM_NONE);
-          @(posedge vif.done);
-        end
-      else if
-        virtual task run_phase(uvm_phase phase);
-  drive();
+
+  virtual task run_phase(uvm_phase phase);
+    drive();
   endtask
 endclass
