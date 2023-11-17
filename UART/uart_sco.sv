@@ -19,4 +19,12 @@ class sco extends uvm_scoreboard;
    virtual function void write(transaction tr);
       `uvm_info("SCO", $sformatf("BAUD:%0d LEN:%0d PAR_T:%0d PAR_EN:%0d STOP:%0d TX_DATA:%0h RX_DATA:%0h", tr.baud, tr.length, tr.parity_type, tr.parity_en, tr.stop2, tr.tx_data, tr.rx_out), UVM_NONE);
 
-      if(tr.
+      if(tr.rst == 1'b1)
+         `uvm_info("SCO", "System Reset", UVM_NONE)
+         else if(tr.tx_data == tr.rx_out)
+            `uvm_info("SCO", "Test Passed", UVM_NONE)
+            else
+               `uvm_error("SCO", $sformatf("Test Failed! TX_DATA:%0h RX_DATA:%0h", tr.tx_data, tr.rx_out))
+               $display("--------");
+            endfunction
+         endclass
