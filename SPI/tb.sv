@@ -1,3 +1,5 @@
+//testbench
+
 `include "spi_cfg.sv"
 `include "spi_if.sv"
 `include "spi_seq.sv"
